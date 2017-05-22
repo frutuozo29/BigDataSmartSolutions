@@ -14,6 +14,8 @@ namespace BigDataSmartSolutions
             // Web API routes
             config.MapHttpAttributeRoutes();
 
+            config.EnableCors();
+
             config.Formatters.Remove(config.Formatters.XmlFormatter);
 
             config.Routes.MapHttpRoute(
