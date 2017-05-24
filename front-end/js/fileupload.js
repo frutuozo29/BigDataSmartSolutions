@@ -1,26 +1,33 @@
+
 $(function () {
     var form;
     $('#file').change(function (event) {
         form = new FormData();
-        form.append('file', event.target.files[0]); // para apenas 1 arquivo
-        //var name = event.target.files[0].content.name; // para capturar o nome do arquivo com sua extenção
+        form.append('file', event.target.files[0]);        
     });
 
     $('#btn-uploadfile').click(function (e) {
-        //e.preventDefault();
-        console.log(form);
+        e.preventDefault();
         $.ajax({
-            url: 'http://localhost:50302/api/Arquivo/Converter', // Url do lado server que vai receber o arquivo
+            url: 'http://localhost:50302/api/Arquivo/Converter',
             data: form,
             processData: false,
-            contentType: "multipart/form-data",
+            contentType: false,
             type: 'POST',
-            //success: function (data) {
-                
-            //},
-            //error: function (data) {
-            //    alert(data.Message);
-            //}
+            success: function (data) {
+                saveTextInFile(data);
+                $('#alertaInfo').show();
+                setTimeout("location.reload();", 10000);                
+            },
+            error: function (data) {
+                $('#alertaDanger').show();
+                setTimeout("$('#alertaDanger').hide();", 10000);
+            }
         });
     });
 });
+
+function saveTextInFile(text){
+    var blob = new Blob([text], {type: "text/csv;charset=utf-8"});
+    saveAs(blob, "arquivoconvertido.csv");    
+}

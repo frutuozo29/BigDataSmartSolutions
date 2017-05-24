@@ -18,8 +18,7 @@
             else
                 label.innerHTML = labelVal;
         });
-
-        // Firefox bug fix
+        
         input.addEventListener('focus', function () { input.classList.add('has-focus'); });
         input.addEventListener('blur', function () { input.classList.remove('has-focus'); });
     });

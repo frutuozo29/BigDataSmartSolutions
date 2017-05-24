@@ -1,11 +1,10 @@
 ﻿using System.Web.Http;
+using System.IO;
+using System.Web.Http.Cors;
 using System.Web;
 using System.Net.Http;
-using System.IO;
 using System.Net;
-using System.Net.Http.Headers;
-using System.Web.Http.Cors;
-using System.Collections.Generic;
+using System.Linq;
 using BigDataSmartSolutions.Models;
 
 namespace BigDataSmartSolutions.Controllers
@@ -13,21 +12,24 @@ namespace BigDataSmartSolutions.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ArquivoController : ApiController
     {
-        [HttpPost] 
-        public IHttpActionResult Converter()
+        [HttpPost]
+        public string Converter()
         {
-            /*var path = @"C:\Users\frutu\Downloads\2DevTecnologia.png";
-            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
-            var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
-            result.Content = new StreamContent(stream);
-            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "Arquivo.png" };
-            */
-            var serverPath = @"C:\Users\frutu\Downloads\2DevTecnologia.png";
-            var fileInfo = new FileInfo(serverPath);
-
-            return !fileInfo.Exists ? (IHttpActionResult)NotFound() : new FileResult(fileInfo.FullName, "application/octet-stream");
-            
+            if (!HttpContext.Current.Request.Files.AllKeys.Any())
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            var httpPostedFile = HttpContext.Current.Request.Files["file"];
+            if (httpPostedFile != null)
+            {
+                if (!Directory.Exists(HttpContext.Current.Server.MapPath("~/Files")))
+                    Directory.CreateDirectory(HttpContext.Current.Server.MapPath("~/Files"));
+                var fileSavePath = Path.Combine(HttpContext.Current.Server.MapPath("~/Files"), httpPostedFile.FileName);
+                httpPostedFile.SaveAs(fileSavePath);
+                var arquivoConvertido = ConversorDeArquivos.ConverterArquivo(fileSavePath);
+                File.Delete(fileSavePath);
+                return arquivoConvertido;
+            }
+            else
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
         }
     }
 }
